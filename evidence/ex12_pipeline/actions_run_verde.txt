@@ -1,0 +1,39 @@
+# Execução real do pipeline no GitHub Actions (consultada pela API pública do GitHub)
+run: https://github.com/joseaugustorosa/repo_at_dev/actions/runs/37171607254
+commit: 17a4690cacb121cdc8bfbe4cc96c4a87c74ab099  ·  evento: push  ·  branch: main
+início: 2026-10-04T02:37:04Z  ·  atualizado: 2026-10-04T02:40:03Z  ·  conclusão: success
+
+JOBS
+  success  Testes de segurança (derivados do threat model) + cobertura  (2026-10-04T02:37:07Z → 2026-10-04T02:37:31Z)
+  success  SAST — Bandit (bloqueia severidade ≥ MEDIUM)  (2026-10-04T02:37:06Z → 2026-10-04T02:37:16Z)
+  success  Teste do gate — o scanner PRECISA reprovar a versão vulnerável  (2026-10-04T02:37:08Z → 2026-10-04T02:37:16Z)
+  success  SCA + segredos — Trivy e pip-audit (bloqueia HIGH/CRITICAL e qualquer CVE com correção)  (2026-10-04T02:37:07Z → 2026-10-04T02:37:37Z)
+  skipped  DAST em staging — ZAP autenticável (somente staging, manual/agendado)  (2026-10-04T02:37:05Z → 2026-10-04T02:37:04Z)
+  success  DAST passivo — OWASP ZAP (baseline + API em modo seguro)  (2026-10-04T02:37:33Z → 2026-10-04T02:39:53Z)
+  success  SECURITY GATE (check obrigatório no branch protection)  (2026-10-04T02:39:57Z → 2026-10-04T02:40:02Z)
+
+PASSOS DO JOB DE DAST PASSIVO
+  success  Set up job
+  success  Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+  success  Run actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+  success  Run pip install -r requirements.txt
+  success  Sobe a aplicação com segredos aleatórios gerados NESTE runner (nada de segredo no repositório)
+  success  ZAP baseline — spider + regras passivas (fail_action=false: o critério é nosso, abaixo)
+  success  Gate do baseline (FAIL em .zap/rules.tsv ou risco >= Médio)
+  success  ZAP baseline na página HTML /web/login (formulário, CSRF, cookies)
+  success  Gate do baseline da página HTML
+  success  Token de conta de recepção de demonstração (descartável, criada neste runner)
+  success  ZAP API scan — importa o OpenAPI e varre as rotas AUTENTICADAS em modo seguro (-S = só passivo)
+  success  Gate do API scan + tabela de correlação OWASP → controle → teste
+  success  Guarda log da aplicação e correlação
+  success  Post Run actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+  success  Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+  success  Complete job
+
+ARTEFATOS PUBLICADOS (relatórios do ZAP etc.)
+  zap-baseline-report  (16537 bytes)
+  zap-baseline-web-report  (20183 bytes)
+  dast-extras  (8979 bytes)
+  zap-api-report  (20219 bytes)
+
+PRIMEIRO RUN (commit 5f2da05): falhou no DAST por causa do demo_token.py (httpx2 não instalado no job); corrigido no commit 17a4690 -> run acima.

@@ -82,7 +82,9 @@ Fonte única: `tests/threat_matrix.py` (25 ameaças → 53 verificações). O te
 * **Variável opcional `STAGING_URL`:** habilita o job de staging.
 * **Segredos no CI:** nenhum. `scripts/bootstrap_env.py` gera segredos aleatórios *no runner*.
 
-## 7. Limites desta entrega
+## 7. Execução real e limites
 
-* O workflow foi validado sintaticamente (YAML), os SHAs das *Actions* foram resolvidos pela API do GitHub e os comandos equivalentes foram **executados localmente** (`evidence/ex12_pipeline/gate_local_saida.txt`: `SECURITY GATE: LIBERADO`; ZAP real em `evidence/ex13_capstone/zap/`). **Não foi executado no GitHub** a partir deste ambiente — falta o *print* do check `SECURITY GATE` e ligar o *branch protection* (é ele que "impede o merge").
-* O ZAP local usou `docker run` + `zap-baseline.py`/`zap-api-scan.py`; o job do Actions usa as *actions* oficiais com as mesmas regras (`.zap/rules.tsv`). O `replacer` do `Authorization` funcionou localmente (403 de RBAC nas rotas protegidas); a sintaxe equivalente em `cmd_options` da *action* não foi exercitada — se o artefato mostrar só 401, é o primeiro ponto a ajustar.
+* **Executado no GitHub Actions:** [run 37171607254](https://github.com/joseaugustorosa/repo_at_dev/actions/runs/37171607254) — jobs `sast`, `sca-and-secrets`, `tests`, `gate-regression`, `dast-passive` e `security-gate` em `success` (`evidence/ex12_pipeline/actions_run_verde.txt`). O 1º run havia falhado no DAST (script de token dependia de `httpx2`); a correção foi validada pelo run seguinte.
+* Os mesmos comandos também rodam localmente (`bash scripts/security_gate_local.sh`) e o ZAP real local está em `evidence/ex13_capstone/zap/`.
+* **Ainda depende do dono do repositório:** ligar o *branch protection* na `main` exigindo o check `SECURITY GATE` (sem isso o gate reporta, mas não impede o merge).
+* **Não verificado:** se o `replacer` do `Authorization` foi aplicado no scan de API do Actions (artefatos exigem login para baixar). Localmente funcionou (403 de RBAC). Conferir no artefato `zap-api-report`.

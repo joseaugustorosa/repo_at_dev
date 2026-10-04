@@ -52,6 +52,7 @@ Antes/depois do Exercício 9 (executa os mesmos 10 ataques nas duas versões):
 ## Checklist de entrega (o que ainda é com você)
 
 - [ ] Gravar o **vídeo de até 5 min** (roteiro em [`docs/ROTEIRO_VIDEO.md`](docs/ROTEIRO_VIDEO.md)), publicar no YouTube como **não listado** e colocar o link em `RELATORIO_TECNICO.md` e neste README (busque por `COLOQUE-O-LINK-AQUI`).
-- [ ] Subir o repositório para o GitHub, deixar o workflow rodar e **salvar o print do check `SECURITY GATE` verde** (ex.: em `evidence/ex12_pipeline/`); ligar o *branch protection* exigindo esse check. O ZAP **já foi executado localmente** (`evidence/ex13_capstone/zap/`); o Actions repete o scan no pipeline.
+- [x] Repositório no GitHub e workflow executado: run verde (`evidence/ex12_pipeline/actions_run_verde.txt`).
+- [ ] **Ligar o branch protection** na `main` exigindo o check `SECURITY GATE` (*Settings → Branches*) e salvar um print do check verde / da regra em `evidence/ex12_pipeline/`. O ZAP já foi executado localmente e no Actions.
 - [ ] Conferir o **nome completo** no relatório e rodar `bash scripts/make_zip.sh` (gera `jose_nascimento_DR2_AT.zip`; ajuste o nome se necessário).
 - [ ] Reconstruir o PDF do relatório (`python scripts/build_report.py`) depois de editar.

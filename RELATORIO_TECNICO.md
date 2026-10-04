@@ -7,7 +7,7 @@
 **Repositório (GitHub):** <https://github.com/joseaugustorosa/repo_at_dev>  
 **Pasta da entrega (Google Drive):** <https://drive.google.com/drive/folders/1Rd5TseE5pK02Be37Nml3IpVy_p2W_FUy?usp=sharing>  
 
-> **Como ler este relatório.** Cada exercício tem: *decisão*, *justificativa*, *onde está no código* e *evidência* (arquivo em `evidence/` ou teste em `tests/`). Todos os números abaixo vêm de execuções reais, reproduzíveis com `bash scripts/collect_evidence.sh` (e `scripts/run_zap_passive.sh` para o ZAP). Itens da rubrica × onde estão demonstrados: Anexo G. O que ainda depende de uma etapa externa (a execução do workflow no GitHub) está marcado como **PENDENTE** no item 12.4 — nada foi inventado.
+> **Como ler este relatório.** Cada exercício tem: *decisão*, *justificativa*, *onde está no código* e *evidência* (arquivo em `evidence/` ou teste em `tests/`). Todos os números abaixo vêm de execuções reais, reproduzíveis com `bash scripts/collect_evidence.sh` (e `scripts/run_zap_passive.sh` para o ZAP). Itens da rubrica × onde estão demonstrados: Anexo G. O que depende de uma etapa externa (ligar o *branch protection* no GitHub) está indicado no item 12.4 — nada foi inventado.
 
 ## Resumo executivo
 
@@ -20,6 +20,7 @@
 | **SAST / SCA** | Bandit (≥ MEDIUM): sem achados · pip-audit: **0 vulnerabilidades** nas dependências finais — contra **25 vulnerabilidades em 5 pacotes** nas dependências fixadas pelo Starter Kit |
 | **Auditoria OpenAPI** | 12 verificações, 0 falhas (`docs/ex13_openapi_audit.md`) |
 | **OWASP ZAP (scan passivo real)** | 4 scans (baseline `/`, baseline `/web/login`, API como recepcionista, API como profissional): **0 alertas bloqueantes**. O 1º scan achou **1 achado real** (90004, COEP ausente, Baixo) → corrigido → 2º scan sem o achado (item 13.4) |
+| **Pipeline no GitHub Actions** | 2º run **verde** (SAST, SCA+segredos, testes+cobertura, gate-regression, DAST passivo e `SECURITY GATE`); o 1º run falhou no DAST, foi corrigido — `evidence/ex12_pipeline/actions_run_verde.txt` |
 | **Decisão de deploy (Ex. 13)** | **GO condicional** — 7 condições (item 13.6) |
 
 **Estrutura da entrega**
@@ -343,7 +344,9 @@ Tabela completa (11 vulnerabilidades, vetor CVSS 3.1, score calculado por `scrip
 
 `security-pipeline.yml`: jobs `sast`, `sca-and-secrets`, `tests`, `gate-regression`, `dast-passive` e `security-gate` (o único check obrigatório no *branch protection*; só libera se **todos** terminarem em `success` — `skipped` bloqueia, lógica testada em `scripts/ci_gate.py`). Boas práticas aplicadas: *Actions* fixadas por **SHA de commit** (o exemplo da aula usava `trivy-action@master`, mutável — risco de cadeia de suprimentos; há teste que reprova qualquer *action* não fixada), `permissions: contents: read`, `concurrency`, execução semanal, segredos de teste gerados no próprio *runner*.
 
-> **Honestidade sobre a execução.** Não tenho como executar o workflow no GitHub a partir deste ambiente. Validei a sintaxe (YAML), os SHAs (resolvidos pela API do GitHub) e **executei localmente os mesmos comandos** (`bash scripts/security_gate_local.sh` → `SECURITY GATE: LIBERADO`; saída em `evidence/ex12_pipeline/gate_local_saida.txt`; o ZAP real, em `evidence/ex13_capstone/zap/`). **PENDENTE:** a execução no Actions, o *print* do check `SECURITY GATE` verde e ligar o *branch protection* exigindo esse check — é ele que efetivamente impede o merge (README, "Checklist de entrega"). A sintaxe do cabeçalho `Authorization` para o ZAP dentro da *action* (`cmd_options`) não foi exercitada; localmente, com `docker run`, funcionou.
+> **Execução real no GitHub Actions.** O workflow foi executado no repositório da entrega ([run 37171607254](https://github.com/joseaugustorosa/repo_at_dev/actions/runs/37171607254), commit `17a4690`, 3 min): **todos os jobs obrigatórios passaram e o `SECURITY GATE` liberou** (`evidence/ex12_pipeline/actions_run_verde.txt`, extraído da API do GitHub). Foram publicados os artefatos `zap-baseline-report`, `zap-baseline-web-report`, `zap-api-report` e `dast-extras`. **O 1º run falhou** (commit `5f2da05`): o job de DAST não gerava o token de demonstração porque o script usava `httpx2`, dependência só de desenvolvimento; corrigi (agora só biblioteca padrão, com esquema de URL validado — meu próprio gate barrou a primeira versão da correção por Bandit B310) e o 2º run ficou verde. Ou seja: o gate bloqueou quando devia e liberou quando devia.
+>
+> **Limites do que está provado:** (1) o *branch protection* exigindo o check `SECURITY GATE` na `main` é uma configuração do GitHub que **precisa ser ligada pelo dono do repositório** — é ela que, de fato, impede o merge; (2) não consegui baixar os artefatos do ZAP do Actions (exige login), então **não verifiquei** se o cabeçalho `Authorization` foi aplicado no scan de API do Actions (localmente foi: respostas 403 de RBAC em vez de 401) — para conferir, abra o artefato `zap-api-report` e veja se as rotas protegidas respondem 403/404/422 e não 401.
 
 ### 12.5 Testes de autorização expandidos a partir do threat model
 
@@ -416,7 +419,7 @@ Resultado da suíte completa: **197 passed**, cobertura **96 %** (`evidence/ex13
 * **Cobertura de conteúdo:** o ZAP monta as requisições com valores de exemplo do OpenAPI (`id=10`, filtros vazios) e quase nunca satisfaz a validação — vê 403/404/422, **não respostas com dado de paciente**. Como profissional, as rotas de consultas deixaram de dar 403 (autorizadas), mas respondem 404/422. O vazamento de campos é coberto por `response_model` + testes + auditoria do OpenAPI.
 * **A página pós-login (`/web/agenda`) não foi visitada** — o login por formulário não foi roteirizado no ZAP. Cookies/CSRF foram avaliados na página de login; o XSS da agenda está provado por teste e captura de tela.
 * O alvo rodou em HTTP: o HSTS está presente, mas só tem efeito sob HTTPS (TLS termina no proxy).
-* Executado numa máquina de desenvolvimento, não em staging; repetir no pipeline contra o ambiente de destino é a condição 1 do deploy (item 13.6).
+* Executado em máquina de desenvolvimento e depois no *runner* do GitHub Actions (job `dast-passive`, verde), ambos contra a aplicação de demonstração — **não** contra staging/produção; repetir contra o ambiente de destino é a condição 1 do deploy (item 13.6).
 
 ### 13.5 Rastreabilidade ponta a ponta
 

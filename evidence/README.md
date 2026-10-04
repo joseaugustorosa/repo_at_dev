@@ -13,7 +13,7 @@ Tudo aqui é saída **real**, regenerável com `bash scripts/collect_evidence.sh
 | 8 e 9 | `ex08_ex09_antes_depois/` | `attack.py` (payloads), `resultado_antes.txt/json` (10/10 explorados), `resultado_depois.txt/json` (0/10), `antes_depois.png`, `vulnerable_baseline/` (**app propositalmente vulnerável — não executar fora de localhost**), `pytest_ex09.txt` |
 | 10 | `ex10_hardening/` | `headers_cors_curl.txt`, `rate_limit_login_curl.txt` (5×401 → 429), `pytest_ex10.txt` |
 | 11 | `ex11_persistencia/` | `pytest_ex11.txt`; ver também `../.env.example` |
-| 12 | `ex12_pipeline/` | `security-pipeline.yml`, `bandit_antes/depois.txt`, `pip_audit_antes/depois.txt` (+`.json`), `starter_kit_requirements.txt`, `gate_local_saida.txt`, `pytest_ex12.txt`; tabela CVSS em `../docs/cvss_priorizacao.md` |
+| 12 | `ex12_pipeline/` | `actions_run_verde.txt` (run real do GitHub Actions), `security-pipeline.yml`, `bandit_antes/depois.txt`, `pip_audit_antes/depois.txt` (+`.json`), `starter_kit_requirements.txt`, `gate_local_saida.txt`, `pytest_ex12.txt`; tabela CVSS em `../docs/cvss_priorizacao.md` |
 | 1 | `ex01_fundacao/uvicorn_e_rotas.txt` | log do uvicorn subindo + `curl` das rotas (rubrica 1.1) |
 | 2 | `ex02_templates_xss/sem_vs_com_response_model.txt` | mesmo registro **sem** e **com** `response_model` (rubrica 1.3) |
 | 13 | `ex13_capstone/` | `pytest_suite_completa_com_cobertura.txt` (197 passed, 96 %), `pytest_ex13_unit_mocks_openapi.txt`, `e2e_demo.txt`, `openapi.json`, **`zap/` (4 scans reais do ZAP + antes/depois da correção do achado 90004)**; auditoria em `../docs/ex13_openapi_audit.md`; risco residual em `../docs/ex13_risco_residual.md` |
