@@ -3,6 +3,7 @@
 FastAPI + SQLModel para pacientes, profissionais e consultas, com autenticação JWT/bcrypt/MFA, autorização RBAC + ownership,
 integração M2M (Client Credentials com escopos), página HTML segura para a recepção e pipeline DevSecOps.
 **Relatório técnico:** [`RELATORIO_TECNICO.md`](RELATORIO_TECNICO.md) (e `.pdf`). **Vídeo (YouTube, não listado):** `https://youtu.be/<COLOQUE-O-LINK-AQUI>`
+**Repositório (GitHub):** <https://github.com/joseaugustorosa/repo_at_dev> · **Pasta da entrega (Google Drive):** <https://drive.google.com/drive/folders/1Rd5TseE5pK02Be37Nml3IpVy_p2W_FUy?usp=sharing>
 
 ## Como rodar
 

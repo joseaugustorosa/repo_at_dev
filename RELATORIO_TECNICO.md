@@ -1,9 +1,11 @@
 # Relatório Técnico — API de Agendamento Clínico
 
-**Disciplina:** Desenvolvimento Seguro de Aplicações Web · Prof. Fabiano Domingues · Engenharia de Computação (Infnet)
-**Entrega:** Assessment DR2 · AT
-**Aluno:** José Augusto Nascimento
-**Vídeo de apresentação (YouTube, não listado):** `https://youtu.be/<COLOQUE-O-LINK-AQUI>`
+**Disciplina:** Desenvolvimento Seguro de Aplicações Web · Prof. Fabiano Domingues · Engenharia de Computação (Infnet)  
+**Entrega:** Assessment DR2 · AT  
+**Aluno:** José Augusto Nascimento  
+**Vídeo de apresentação (YouTube, não listado):** `https://youtu.be/<COLOQUE-O-LINK-AQUI>`  
+**Repositório (GitHub):** <https://github.com/joseaugustorosa/repo_at_dev>  
+**Pasta da entrega (Google Drive):** <https://drive.google.com/drive/folders/1Rd5TseE5pK02Be37Nml3IpVy_p2W_FUy?usp=sharing>  
 
 > **Como ler este relatório.** Cada exercício tem: *decisão*, *justificativa*, *onde está no código* e *evidência* (arquivo em `evidence/` ou teste em `tests/`). Todos os números abaixo vêm de execuções reais, reproduzíveis com `bash scripts/collect_evidence.sh` (e `scripts/run_zap_passive.sh` para o ZAP). Itens da rubrica × onde estão demonstrados: Anexo G. O que ainda depende de uma etapa externa (a execução do workflow no GitHub) está marcado como **PENDENTE** no item 12.4 — nada foi inventado.
 

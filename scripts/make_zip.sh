@@ -14,6 +14,7 @@ echo "== montando pacote (sem .venv, .env, bancos, caches, evidence/.local)"
 rm -rf "$PWD/.build/zipstage"; mkdir -p "$STAGE"
 rsync -a --exclude-from=- ./ "$STAGE/" <<'EXCLUDES'
 .venv/
+.git/
 .env
 *.db
 *.sqlite3
