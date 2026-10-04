@@ -1,0 +1,16 @@
+# Regras do ZAP baseline (passivo): <ID da regra>	<IGNORE|WARN|FAIL>	(<comentário>)
+# FAIL = bloqueia o pipeline. Critério: risco >= Médio sobre controles que a aplicação DEVE ter
+# (cabeçalhos, cookies, CORS, CSRF, vazamento de versão). Ajustado após o scan do Exercício 13.
+10020	FAIL	(Anti-clickjacking: X-Frame-Options / frame-ancestors)
+10021	FAIL	(X-Content-Type-Options ausente)
+10035	FAIL	(Strict-Transport-Security ausente)
+10038	FAIL	(Content-Security-Policy ausente)
+10098	FAIL	(Cross-Domain Misconfiguration / CORS permissivo)
+10010	FAIL	(Cookie sem HttpOnly)
+10011	FAIL	(Cookie sem Secure)
+10054	FAIL	(Cookie sem SameSite)
+10202	FAIL	(Ausência de token Anti-CSRF)
+10036	FAIL	(Header Server vaza versão)
+10037	FAIL	(X-Powered-By vaza versão)
+90022	FAIL	(Application Error Disclosure: stack trace / erro detalhado)
+10096	IGNORE	(Timestamp Disclosure: baixo risco, campo date/created legítimo)

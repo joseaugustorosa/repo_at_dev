@@ -1,0 +1,61 @@
+$ source .venv/bin/activate && uvicorn main:app --host 127.0.0.1 --port 8000 --no-server-header
+INFO:     Started server process [72132]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+{"ts": "2026-10-04T02:26:03+00:00", "event": "login", "outcome": "success", "user_id": 3, "role": "profissional", "channel": "api"}
+INFO:     127.0.0.1:58092 - "POST /user/signin HTTP/1.1" 200 OK
+
+$ curl -i http://127.0.0.1:8000/                       # rota pública
+HTTP/1.1 200 OK
+{"message":"API de Agendamento Clínico"}
+$ curl -i http://127.0.0.1:8000/health                 # rota pública
+HTTP/1.1 200 OK
+{"status":"ok"}
+$ curl -i http://127.0.0.1:8000/appointment/           # sem token => deny-by-default
+HTTP/1.1 401 Unauthorized
+www-authenticate: Bearer
+{"detail":"Credenciais ausentes ou inválidas."}
+
+$ curl -H 'Authorization: Bearer <token>' http://127.0.0.1:8000/appointment/   # profissional autenticado
+[
+  {
+    "id": 1,
+    "patient_id": 1,
+    "professional_id": 3,
+    "date_time": "2026-10-05T09:00:00",
+    "status": "agendada",
+    "reason": "Retorno de exames",
+    "notes": "Paciente refere melhora. PA 120/80."
+  }
+]
+... total: 2 consulta(s) — só as do próprio profissional
+
+$ curl -s http://127.0.0.1:8000/openapi.json | jq '.paths | keys'
+[
+  "/",
+  "/appointment/",
+  "/appointment/agenda",
+  "/appointment/new",
+  "/appointment/{appointment_id}",
+  "/availability/",
+  "/health",
+  "/oauth/token",
+  "/patient/",
+  "/patient/new",
+  "/patient/search",
+  "/patient/{patient_id}",
+  "/user/",
+  "/user/me",
+  "/user/mfa/verify",
+  "/user/signin",
+  "/user/signup",
+  "/user/{user_id}/deactivate"
+]
+
+# estrutura modular:
+  auth
+  core
+  database
+  models
+  routes

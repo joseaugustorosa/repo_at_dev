@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Agenda do dia · Agendamento</title>
+  <style>:root { --bg:#f6f7f9; --fg:#1b2430; --muted:#5b6675; --card:#fff; --line:#dde2e9; --accent:#0b6bcb; --danger:#b42318; }
+* { box-sizing: border-box; }
+body { margin:0; font:16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; background:var(--bg); color:var(--fg); }
+.topbar { display:flex; justify-content:space-between; align-items:center; padding:12px 24px; background:var(--accent); color:#fff; }
+.brand { font-weight:600; }
+.topbar .who { margin-right:12px; }
+main { max-width:960px; margin:24px auto; padding:0 16px; }
+h1 { font-size:1.4rem; }
+.card { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:24px; }
+.narrow { max-width:380px; margin:48px auto; }
+label { display:block; margin:12px 0; font-size:.9rem; color:var(--muted); }
+input { display:block; width:100%; margin-top:4px; padding:8px; border:1px solid var(--line); border-radius:6px; font:inherit; }
+button { padding:8px 16px; border:0; border-radius:6px; background:var(--accent); color:#fff; font:inherit; cursor:pointer; }
+button.link { background:none; text-decoration:underline; padding:0; color:#fff; }
+form.inline { display:flex; gap:8px; align-items:flex-end; }
+form.inline label { margin:0; }
+form.inline input { width:auto; }
+table { width:100%; border-collapse:collapse; margin-top:16px; background:var(--card); border:1px solid var(--line); }
+th, td { text-align:left; padding:10px 12px; border-bottom:1px solid var(--line); }
+th { font-size:.8rem; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); }
+.status { padding:2px 8px; border-radius:999px; font-size:.8rem; background:#e8f1fd; }
+.status.cancelada { background:#fde8e8; color:var(--danger); }
+.status.concluida { background:#e6f4ea; color:#1e6b3a; }
+.alert { padding:8px 12px; border-radius:6px; background:#fde8e8; color:var(--danger); }
+.empty { color:var(--muted); margin-top:24px; }
+footer { text-align:center; color:var(--muted); font-size:.8rem; padding:24px; }
+</style>
+</head>
+<body>
+  <header class="topbar">
+    <span class="brand">Clínica · Agendamento</span>
+    
+<form class="inline" method="post" action="/web/logout">
+  <input type="hidden" name="csrf_token" value="qqO2TSfezwy9ayL7B1btOR1yc0JOVBvf2bSNn1sQwT8">
+  <span class="who">Rita Recepção</span>
+  <button type="submit" class="link">Sair</button>
+</form>
+
+  </header>
+  <main>
+    
+<h1>Agenda de 05/10/2026</h1>
+
+<form class="inline" method="get" action="/web/agenda">
+  <label>Data <input type="date" name="day" value="2026-10-05"></label>
+  <button type="submit">Ver</button>
+</form>
+
+
+
+<table>
+  <thead>
+    <tr><th>Horário</th><th>Paciente</th><th>Profissional</th><th>Motivo</th><th>Status</th></tr>
+  </thead>
+  <tbody>
+  
+    <tr>
+      <td>09:00</td>
+      <td>Maria da Silva</td>
+      <td>Dra Helena Costa</td>
+      <td>Retorno de exames</td>
+      <td><span class="status agendada">agendada</span></td>
+    </tr>
+  
+    <tr>
+      <td>10:00</td>
+      <td>João Pereira</td>
+      <td>Dra Helena Costa</td>
+      <td>Consulta de rotina</td>
+      <td><span class="status agendada">agendada</span></td>
+    </tr>
+  
+    <tr>
+      <td>11:00</td>
+      <td>&#34;&gt;&lt;img src=x onerror=alert(1)&gt;</td>
+      <td>Dra Helena Costa</td>
+      <td>&lt;script&gt;alert(&#34;xss armazenado&#34;)&lt;/script&gt;</td>
+      <td><span class="status agendada">agendada</span></td>
+    </tr>
+  
+  </tbody>
+</table>
+
+
+  </main>
+  <footer>Uso interno. Contém dados pessoais protegidos pela LGPD — não compartilhe capturas de tela.</footer>
+</body>
+</html>

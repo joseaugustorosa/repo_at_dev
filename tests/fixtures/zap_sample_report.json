@@ -1,0 +1,13 @@
+{
+  "_AVISO": "FIXTURE SINTÉTICA usada apenas para testar scripts/zap_report.py. NÃO é saída de um scan real e NÃO é evidência.",
+  "@version": "synthetic",
+  "site": [{
+    "@name": "http://127.0.0.1:8000",
+    "alerts": [
+      {"pluginid": "10021", "name": "X-Content-Type-Options Header Missing", "riskcode": "1", "cweid": "693", "count": "2", "instances": []},
+      {"pluginid": "10096", "name": "Timestamp Disclosure - Unix", "riskcode": "0", "cweid": "200", "count": "1", "instances": []},
+      {"pluginid": "10055", "name": "CSP: style-src unsafe-inline", "riskcode": "2", "cweid": "693", "count": "1", "instances": []},
+      {"pluginid": "40012", "name": "Cross Site Scripting (Reflected)", "riskcode": "3", "cweid": "79", "count": "1", "instances": []}
+    ]
+  }]
+}

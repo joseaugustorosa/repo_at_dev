@@ -1,0 +1,48 @@
+# Mesmo registro, duas versões. A tabela tem campos internos (created_from_ip, internal_audit_note...) e CPF completo.
+
+### SEM response_model dedicado (response_model = a própria tabela, como no Starter Kit) — versão vulnerável
+$ GET /appointment/1  -> HTTP 200
+{
+  "date_time": "2026-10-05T09:00:00",
+  "id": 1,
+  "reason": "Retorno de exames",
+  "notes": "Paciente refere melhora. PA 120/80.",
+  "internal_audit_note": "revisar-depois",
+  "patient_id": 1,
+  "professional_id": 3,
+  "status": "agendada",
+  "created_from_ip": "10.0.0.5"
+}
+
+### COM response_model dedicado (AppointmentPublic: whitelist de campos) — versão corrigida
+$ GET /appointment/1  -> HTTP 200
+{
+  "id": 1,
+  "patient_id": 1,
+  "professional_id": 3,
+  "date_time": "2026-10-05T09:00:00",
+  "status": "agendada",
+  "reason": "Retorno de exames",
+  "notes": "Paciente refere melhora. PA 120/80."
+}
+
+### SEM response_model dedicado — paciente
+$ GET /patient/1  -> HTTP 200
+{
+  "professional_id": 3,
+  "cpf": "52998224725",
+  "phone": "11999000000",
+  "id": 1,
+  "name": "Maria da Silva"
+}
+
+### COM response_model dedicado (PatientPublic: CPF mascarado) — paciente
+$ GET /patient/1  -> HTTP 200
+{
+  "id": 1,
+  "name": "Maria da Silva",
+  "cpf": "***.***.***-25",
+  "phone": "11999000000",
+  "email": null,
+  "professional_id": 3
+}

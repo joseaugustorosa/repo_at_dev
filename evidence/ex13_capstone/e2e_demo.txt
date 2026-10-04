@@ -1,0 +1,52 @@
+
+=== 1. Sem token: tudo é negado (deny-by-default)
+  -> HTTP 401 {"detail":"Credenciais ausentes ou inválidas."}
+     www-authenticate: Bearer
+
+=== 2. Profissional (Dra. Helena) lista as PRÓPRIAS consultas — sem campos internos
+  -> HTTP 200 [{"id":1,"patient_id":1,"professional_id":3,"date_time":"2026-10-05T09:00:00","status":"agendada","reason":"Retorno de exames","notes":"Paciente refere melhora. PA 120/80."},{"id":2,"patient_id":2,"professional_id":3,"date_time":"2026-10-05T10:00:00","status":"agendada","reason":"Consulta de rotina"…
+
+=== 3. BOLA: Dr. Paulo tenta ler a consulta da Dra. Helena trocando o ID na URL
+  -> HTTP 404 {"detail":"Consulta não encontrada."}
+     (404 igual ao de 'inexistente': não confirma que o ID existe)
+
+=== 4. Mass assignment: tentar escolher 'professional_id' no corpo
+  -> HTTP 422 {"detail":[{"loc":["body","professional_id"],"msg":"Extra inputs are not permitted","type":"extra_forbidden"}]}
+
+=== 5. Stored XSS: motivo com <script> é rejeitado na entrada
+  -> HTTP 422 {"detail":[{"loc":["body","reason"],"msg":"String should match pattern '^[A-Za-z0-9À-ÖØ-öø-ÿ\\s.,;:!?()\\-_/%+ºª°'\\\"]{3,120}$'","type":"string_pattern_mismatch"}]}
+
+=== 6. Recepção NÃO cria consulta, mas vê a agenda sem dados clínicos
+  -> HTTP 403 {"detail":"Acesso negado para o seu perfil."}
+  -> HTTP 200 [{"id":1,"date_time":"2026-10-05T09:00:00","status":"agendada","reason":"Retorno de exames","patient_name":"Maria da Silva","professional_name":"Dra Helena Costa"},{"id":4,"date_time":"2026-10-05T09:00:00","status":"agendada","reason":"Retorno","patient_name":"Carlos Eduardo Rocha","professional_nam…
+
+=== 7. Não-admin em rota de admin => 403; admin exige MFA (TOTP)
+  -> HTTP 403 {"detail":"Acesso negado para o seu perfil."}
+  -> HTTP 200 {"token_type":"Bearer","mfa_required":true,"mfa_token":"eyJ…(token redigido)"}…
+  -> HTTP 200 {"access_token":"eyJ…(token redigido)","token_type":"Bearer","expires_in":1800,"mfa_required":false}…
+  -> HTTP 200 [{"id":1,"name":"Admin Demo","email":"admin@demo.clinica.com.br","role":"admin","is_active":true},{"id":2,"name":"Rita Recepcao","email":"recepcao@demo.clinica.com.br","role":"recepcionista","is_active":true},{"id":3,"name":"Dra Helena Costa","email":"helena@demo.clinica.com.br","role":"profissional…
+
+=== 8. Laboratório (M2M): Client Credentials com escopo availability:read
+  -> HTTP 200 {"access_token":"eyJ…(token redigido)","token_type":"Bearer","expires_in":600,"scope":"availability:read"}…
+  -> HTTP 200 {"professional_id":3,"day":"2026-10-05","slot_minutes":30,"available_slots":["08:00:00","08:30:00","09:30:00","10:30:00","11:00:00","11:30:00","12:00:00","12:30:00","13:00:00","13:30:00","14:00:00","14:30:00","15:00:00","15:30:00","16:00:00","16:30:00","17:00:00","17:30:00"]}
+  Mesmo token do laboratório em rotas de usuários:
+  -> HTTP 403 {"detail":"Este token não é de um usuário."}
+     www-authenticate: None
+  Pedir escopo que o contrato não prevê:
+  -> HTTP 400 {"error":"invalid_scope","error_description":"Escopo não permitido para este cliente."}
+
+=== 9. Cabeçalhos de segurança e CORS (allowlist)
+  Origin maliciosa -> access-control-allow-origin: None
+  Origin permitida -> access-control-allow-origin: http://localhost:3000
+  -> HTTP 200 {"status":"ok"}
+     strict-transport-security: max-age=63072000; includeSubDomains
+     x-frame-options: DENY
+     x-content-type-options: nosniff
+
+=== 10. Rate limit do login: 5 tentativas/min (a 6ª recebe 429)
+  tentativa 1: HTTP 401 
+  tentativa 2: HTTP 401 
+  tentativa 3: HTTP 401 
+  tentativa 4: HTTP 401 
+  tentativa 5: HTTP 401 
+  tentativa 6: HTTP 429 59

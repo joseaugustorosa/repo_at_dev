@@ -1,0 +1,9 @@
+# Requisições que a API recebeu durante os scans do ZAP (log de acesso do uvicorn)
+total: 57
+com payload típico de ataque ativo (SQLi/XSS/traversal/time-based): 0
+
+por método/status:
+  40 HTTP/1.1 
+  11 HTTP/1.1 Content
+   4 HTTP/1.1 Found
+   2 HTTP/1.1 Request

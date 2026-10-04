@@ -1,0 +1,205 @@
+name: Security Pipeline (DevSecOps)
+
+# Quando roda:
+#  - pull_request / push em main  -> fases 1 e 2 (gate de merge)
+#  - schedule (2ª-feira 06:00 UTC)  -> reavalia dependências: CVE nova pode surgir sem nenhum commit
+#  - workflow_dispatch              -> manual (inclui o scan ATIVO de staging, se STAGING_URL estiver definido)
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read # menor privilégio: o pipeline não escreve em nada do repositório
+
+concurrency:
+  group: security-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.13"
+
+jobs:
+  # ───────────────────────── FASE 1 — build / PR (rápida, determinística) ─────────────────────────
+  sast:
+    name: "SAST — Bandit (bloqueia severidade ≥ MEDIUM)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: pip install bandit==1.9.4
+      # -ll = MEDIUM ou maior. O exemplo da aula usava -lll (só HIGH), que NÃO pegaria a SQL injection
+      # (B608 é MEDIUM) — ver evidence/ex12_pipeline/bandit_antes.txt.
+      - run: bandit -r auth core database models routes main.py scripts -ll
+
+  sca-and-secrets:
+    name: "SCA + segredos — Trivy e pip-audit (bloqueia HIGH/CRITICAL e qualquer CVE com correção)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0 (SHA fixo, não @master)
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln,secret,misconfig
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
+          format: table
+          # a versão vulnerável de demonstração é analisada separadamente (job gate-regression)
+          skip-dirs: evidence/ex08_ex09_antes_depois/vulnerable_baseline,.venv
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: pip install pip-audit==2.10.1
+      - run: pip-audit -r requirements.txt --strict
+
+  tests:
+    name: "Testes de segurança (derivados do threat model) + cobertura"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+      - run: pip install -r requirements-dev.txt
+      # Qualquer teste de segurança vermelho bloqueia, independentemente de CVSS (BOLA, XSS, authz).
+      - run: python -m pytest -q --cov --cov-report=term-missing --cov-fail-under=85
+      - run: python scripts/audit_openapi.py # auditoria do contrato; sai com 1 se houver FAIL
+
+  gate-regression:
+    name: "Teste do gate — o scanner PRECISA reprovar a versão vulnerável"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: pip install bandit==1.9.4
+      - name: "Bandit deve falhar na baseline vulnerável (senão o gate está frouxo)"
+        run: |
+          if bandit -r evidence/ex08_ex09_antes_depois/vulnerable_baseline -ll -q; then
+            echo "::error::Gate frouxo: a baseline vulnerável passou no SAST"; exit 1
+          fi
+          echo "OK: o SAST bloqueou a baseline vulnerável como esperado"
+
+  # ───────────────────────── FASE 2 — aplicação em execução (DAST passivo) ─────────────────────────
+  dast-passive:
+    name: "DAST passivo — OWASP ZAP (baseline + API em modo seguro)"
+    runs-on: ubuntu-latest
+    needs: [tests]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: "Sobe a aplicação com segredos aleatórios gerados NESTE runner (nada de segredo no repositório)"
+        run: |
+          python scripts/bootstrap_env.py
+          python scripts/seed_demo.py
+          export COOKIE_SECURE=true   # alvo configurado como em produção (o .env gerado usa false só p/ HTTP local)
+          nohup uvicorn main:app --host 127.0.0.1 --port 8000 --no-server-header > uvicorn.log 2>&1 &
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:8000/health && break; sleep 1; done
+      - name: "ZAP baseline — spider + regras passivas (fail_action=false: o critério é nosso, abaixo)"
+        uses: zaproxy/action-baseline@de8ad967d3548d44ef623df22cf95c3b0baf8b25 # v0.15.0
+        with:
+          target: http://127.0.0.1:8000
+          rules_file_name: .zap/rules.tsv
+          fail_action: false
+          allow_issue_writing: false # permissions: contents: read
+          artifact_name: zap-baseline-report
+      - name: "Gate do baseline (FAIL em .zap/rules.tsv ou risco >= Médio)"
+        run: |
+          cp report_json.json zap_baseline.json
+          python scripts/zap_report.py gate zap_baseline.json .zap/rules.tsv
+      - name: "ZAP baseline na página HTML /web/login (formulário, CSRF, cookies)"
+        uses: zaproxy/action-baseline@de8ad967d3548d44ef623df22cf95c3b0baf8b25 # v0.15.0
+        with:
+          target: http://127.0.0.1:8000/web/login
+          rules_file_name: .zap/rules.tsv
+          fail_action: false
+          allow_issue_writing: false
+          artifact_name: zap-baseline-web-report
+      - name: "Gate do baseline da página HTML"
+        run: |
+          cp report_json.json zap_baseline_web.json
+          python scripts/zap_report.py gate zap_baseline_web.json .zap/rules.tsv
+      - name: "Token de conta de recepção de demonstração (descartável, criada neste runner)"
+        id: token
+        run: |
+          TOKEN="$(python scripts/demo_token.py recepcao@demo.clinica.com.br)"
+          echo "::add-mask::$TOKEN"
+          echo "value=$TOKEN" >> "$GITHUB_OUTPUT"
+      - name: "ZAP API scan — importa o OpenAPI e varre as rotas AUTENTICADAS em modo seguro (-S = só passivo)"
+        uses: zaproxy/action-api-scan@5158fe4d9d8fcc75ea204db81317cce7f9e5453d # v0.10.0
+        with:
+          target: http://127.0.0.1:8000/openapi.json
+          format: openapi
+          rules_file_name: .zap/rules.tsv
+          fail_action: false
+          allow_issue_writing: false
+          artifact_name: zap-api-report
+          cmd_options: >-
+            -S -z "-config replacer.full_list(0).description=auth -config replacer.full_list(0).enabled=true
+            -config replacer.full_list(0).matchtype=REQ_HEADER -config replacer.full_list(0).matchstr=Authorization
+            -config replacer.full_list(0).regex=false -config replacer.full_list(0).replacement=Bearer\ ${{ steps.token.outputs.value }}"
+      - name: "Gate do API scan + tabela de correlação OWASP → controle → teste"
+        run: |
+          cp report_json.json zap_api.json
+          python scripts/zap_report.py report zap_api.json zap_api_correlacao.md
+          python scripts/zap_report.py gate zap_api.json .zap/rules.tsv
+      - name: "Guarda log da aplicação e correlação"
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: dast-extras
+          path: |
+            uvicorn.log
+            zap_api_correlacao.md
+            zap_baseline.json
+            zap_baseline_web.json
+            zap_api.json
+
+  # ───────────────────────── FASE 3 — staging (scan ATIVO; nunca em produção) ─────────────────────────
+  dast-active-staging:
+    name: "DAST em staging — ZAP autenticável (somente staging, manual/agendado)"
+    if: ${{ (github.event_name == 'workflow_dispatch' || github.event_name == 'schedule') && vars.STAGING_URL != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: "ZAP baseline autenticado contra o ambiente de staging (dados fictícios)"
+        uses: zaproxy/action-baseline@de8ad967d3548d44ef623df22cf95c3b0baf8b25 # v0.15.0
+        with:
+          target: ${{ vars.STAGING_URL }}
+          rules_file_name: .zap/rules.tsv
+          fail_action: false
+          allow_issue_writing: false
+          artifact_name: zap-staging-report
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: python scripts/zap_report.py gate report_json.json .zap/rules.tsv
+      # IAST (análise interativa): requer agente instrumentando o app durante a suíte de integração em
+      # QA/staging (ex.: Contrast Assess, Datadog IAST). Não há agente configurado neste projeto; ver
+      # docs/ex12_pipeline_devsecops.md para a justificativa de fase e a lacuna assumida.
+
+  # ───────────────────────── SECURITY GATE ─────────────────────────
+  security-gate:
+    name: "SECURITY GATE (check obrigatório no branch protection)"
+    if: always()
+    needs: [sast, sca-and-secrets, tests, gate-regression, dast-passive]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: "Libera somente se TODOS os jobs obrigatórios terminaram com success"
+        env:
+          RESULTS: ${{ toJSON(needs) }}
+        run: python3 scripts/ci_gate.py

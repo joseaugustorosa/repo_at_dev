@@ -1,0 +1,16 @@
+### Bandit na versão VULNERÁVEL — comparação de critérios de bloqueio
+
+--- (a) critério do exemplo da aula: -lll (somente HIGH)
+exit code: 0   (0 = pipeline passaria; a SQL injection NÃO seria bloqueada)
+
+--- (b) critério adotado: -ll (MEDIUM ou maior)
+>> Issue: [B608:hardcoded_sql_expressions] Possible SQL injection vector through string-based query construction.
+   Severity: Medium   Confidence: Low
+   Location: evidence/ex08_ex09_antes_depois/vulnerable_baseline/app.py:142:14
+exit code: 1   (1 = pipeline bloqueado)
+
+--- (c) tudo que o Bandit enxerga (todas as severidades) — o que fica fora do gate
+LOW    B105 evidence/ex08_ex09_antes_depois/vulnerable_baseline/app.py:26  Possible hardcoded password: 'chave_secreta_super_segura_para_estudantes'
+LOW    B105 evidence/ex08_ex09_antes_depois/vulnerable_baseline/app.py:27  Possible hardcoded password: 'Baseline-Pass-1!'
+LOW    B105 evidence/ex08_ex09_antes_depois/vulnerable_baseline/app.py:130  Possible hardcoded password: 'Bearer'
+MEDIUM B608 evidence/ex08_ex09_antes_depois/vulnerable_baseline/app.py:142  Possible SQL injection vector through string-based query construction.

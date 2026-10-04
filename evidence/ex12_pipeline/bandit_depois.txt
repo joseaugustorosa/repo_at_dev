@@ -1,0 +1,24 @@
+### Bandit na versão FINAL (gate: -ll)
+Run started:2026-10-04 02:26:21.645448+00:00
+
+Test results:
+	No issues identified.
+
+Code scanned:
+	Total lines of code: 2687
+	Total lines skipped (#nosec): 0
+	Total potential issues skipped due to specifically being disabled (e.g., #nosec BXXX): 0
+
+Run metrics:
+	Total issues (by severity):
+		Undefined: 0
+		Low: 7
+		Medium: 0
+		High: 0
+	Total issues (by confidence):
+		Undefined: 0
+		Low: 0
+		Medium: 1
+		High: 6
+Files skipped (0):
+exit code: 0

@@ -1,0 +1,23 @@
+##### alvo: fixed (http://127.0.0.1:8000) #####
+[A1] BLOQUEADO A01 / API3 — mass assignment + escalada de privilégio — POST /user/signup sem login, com role=admin
+        HTTP 401 {"detail":"Credenciais ausentes ou inválidas."}
+[A2] BLOQUEADO A01 / API1 — BOLA (leitura) — GET /appointment/1 por outro profissional
+        HTTP 404 {"detail":"Consulta não encontrada."}
+[A3] BLOQUEADO A01 / API1 — BOLA (mesmo padrão, outro endpoint) — GET /patient/1 por outro profissional
+        HTTP 404 {"detail":"Paciente não encontrado."}
+[A4] BLOQUEADO A01 / API1 — BOLA (escrita) — PUT /appointment/1 por outro profissional
+        HTTP 404 {"detail":"Consulta não encontrada."}
+[A5] BLOQUEADO A03 — SQL injection — GET /patient/search?name=' OR '1'='1
+        HTTP 422 {"detail":[{"loc":["query","name"],"msg":"String should match pattern '^[A-Za-zÀ-ÖØ-öø-ÿ .'\\-]{2,60}$'","type… | linhas devolvidas: 0 (Paulo só tem 2 pacientes)
+[A6] BLOQUEADO A02 / A07 — segredo JWT fixo => token forjado — GET /user/ com JWT de admin assinado com o segredo do repositório
+        HTTP 401 {"detail":"Credenciais ausentes ou inválidas."}
+[A7] BLOQUEADO A03 — XSS armazenado — motivo da consulta com <script> exibido na página da recepção
+        gravação: HTTP 422 {"detail":[{"loc":["body","reason"],"msg":"String should match pattern… | <script> cru na página: False
+[A9] BLOQUEADO API3 — excessive data exposure — campos internos de auditoria e CPF completo nas respostas
+        campos internos devolvidos: nenhum | CPF completo: False
+[A10] BLOQUEADO A05 — security misconfiguration — CORS para origem maliciosa + cabeçalhos HSTS/XFO/XCTO
+        Access-Control-Allow-Origin=None | cabeçalhos ausentes: nenhum
+[A8] BLOQUEADO A07 — força bruta sem limite — 30 tentativas de login em sequência
+        status das 30 tentativas: 401 x5, 429 x25
+
+RESUMO (fixed): 0 explorados / 10 bloqueados de 10 ataques

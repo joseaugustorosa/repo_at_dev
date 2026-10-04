@@ -1,0 +1,3 @@
+### SCA (pip-audit) — dependências da versão FINAL (requirements.txt), incluindo transitivas
+No known vulnerabilities found
+exit code: 0

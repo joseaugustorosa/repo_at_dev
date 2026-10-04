@@ -1,0 +1,13 @@
+# Rate limit do login: 5 tentativas/min por (conta+IP); a 6ª recebe 429 + Retry-After
+tentativa 1 -> HTTP 401
+tentativa 2 -> HTTP 401
+tentativa 3 -> HTTP 401
+tentativa 4 -> HTTP 401
+tentativa 5 -> HTTP 401
+tentativa 6 -> HTTP 429
+tentativa 7 -> HTTP 429
+
+# Cabeçalho Retry-After:
+HTTP/1.1 429 Too Many Requests
+retry-after: 59
+{"detail":"Muitas requisições. Tente novamente mais tarde."}

@@ -1,0 +1,7 @@
+[run]
+source = auth, core, database, models, routes, main
+omit = */tests/*, scripts/*
+
+[report]
+show_missing = True
+skip_covered = True

@@ -1,0 +1,75 @@
+{
+  "target": "fixed",
+  "results": [
+    {
+      "id": "A1",
+      "owasp": "A01 / API3 — mass assignment + escalada de privilégio",
+      "title": "POST /user/signup sem login, com role=admin",
+      "verdict": "BLOQUEADO",
+      "evidence": "HTTP 401 {\"detail\":\"Credenciais ausentes ou inválidas.\"}"
+    },
+    {
+      "id": "A2",
+      "owasp": "A01 / API1 — BOLA (leitura)",
+      "title": "GET /appointment/1 por outro profissional",
+      "verdict": "BLOQUEADO",
+      "evidence": "HTTP 404 {\"detail\":\"Consulta não encontrada.\"}"
+    },
+    {
+      "id": "A3",
+      "owasp": "A01 / API1 — BOLA (mesmo padrão, outro endpoint)",
+      "title": "GET /patient/1 por outro profissional",
+      "verdict": "BLOQUEADO",
+      "evidence": "HTTP 404 {\"detail\":\"Paciente não encontrado.\"}"
+    },
+    {
+      "id": "A4",
+      "owasp": "A01 / API1 — BOLA (escrita)",
+      "title": "PUT /appointment/1 por outro profissional",
+      "verdict": "BLOQUEADO",
+      "evidence": "HTTP 404 {\"detail\":\"Consulta não encontrada.\"}"
+    },
+    {
+      "id": "A5",
+      "owasp": "A03 — SQL injection",
+      "title": "GET /patient/search?name=' OR '1'='1",
+      "verdict": "BLOQUEADO",
+      "evidence": "HTTP 422 {\"detail\":[{\"loc\":[\"query\",\"name\"],\"msg\":\"String should match pattern '^[A-Za-zÀ-ÖØ-öø-ÿ .'\\\\-]{2,60}$'\",\"type… | linhas devolvidas: 0 (Paulo só tem 2 pacientes)"
+    },
+    {
+      "id": "A6",
+      "owasp": "A02 / A07 — segredo JWT fixo => token forjado",
+      "title": "GET /user/ com JWT de admin assinado com o segredo do repositório",
+      "verdict": "BLOQUEADO",
+      "evidence": "HTTP 401 {\"detail\":\"Credenciais ausentes ou inválidas.\"}"
+    },
+    {
+      "id": "A7",
+      "owasp": "A03 — XSS armazenado",
+      "title": "motivo da consulta com <script> exibido na página da recepção",
+      "verdict": "BLOQUEADO",
+      "evidence": "gravação: HTTP 422 {\"detail\":[{\"loc\":[\"body\",\"reason\"],\"msg\":\"String should match pattern… | <script> cru na página: False"
+    },
+    {
+      "id": "A8",
+      "owasp": "A07 — força bruta sem limite",
+      "title": "30 tentativas de login em sequência",
+      "verdict": "BLOQUEADO",
+      "evidence": "status das 30 tentativas: 401 x5, 429 x25"
+    },
+    {
+      "id": "A9",
+      "owasp": "API3 — excessive data exposure",
+      "title": "campos internos de auditoria e CPF completo nas respostas",
+      "verdict": "BLOQUEADO",
+      "evidence": "campos internos devolvidos: nenhum | CPF completo: False"
+    },
+    {
+      "id": "A10",
+      "owasp": "A05 — security misconfiguration",
+      "title": "CORS para origem maliciosa + cabeçalhos HSTS/XFO/XCTO",
+      "verdict": "BLOQUEADO",
+      "evidence": "Access-Control-Allow-Origin=None | cabeçalhos ausentes: nenhum"
+    }
+  ]
+}

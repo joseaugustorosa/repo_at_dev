@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Agenda do dia{% endblock %}
+
+{% block nav %}
+<form class="inline" method="post" action="/web/logout">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  <span class="who">{{ user_name }}</span>
+  <button type="submit" class="link">Sair</button>
+</form>
+{% endblock %}
+
+{% block content %}
+<h1>Agenda de {{ day.strftime("%d/%m/%Y") }}</h1>
+
+<form class="inline" method="get" action="/web/agenda">
+  <label>Data <input type="date" name="day" value="{{ day.isoformat() }}"></label>
+  <button type="submit">Ver</button>
+</form>
+
+{# Todo valor abaixo passa pelo autoescape do Jinja2. Não use |safe aqui. #}
+{% if items %}
+<table>
+  <thead>
+    <tr><th>Horário</th><th>Paciente</th><th>Profissional</th><th>Motivo</th><th>Status</th></tr>
+  </thead>
+  <tbody>
+  {% for item in items %}
+    <tr>
+      <td>{{ item.date_time.strftime("%H:%M") }}</td>
+      <td>{{ item.patient_name }}</td>
+      <td>{{ item.professional_name }}</td>
+      <td>{{ item.reason }}</td>
+      <td><span class="status {{ item.status.value }}">{{ item.status.value }}</span></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="empty">Nenhuma consulta para esta data.</p>
+{% endif %}
+{% endblock %}

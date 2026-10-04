@@ -1,0 +1,29 @@
+### SCA (pip-audit) — dependências FIXADAS no Starter Kit da disciplina
+Found 25 known vulnerabilities in 5 packages
+Name             Version ID              Fix Versions
+---------------- ------- --------------- ------------
+fastapi          0.77.1  PYSEC-2024-38   0.109.1
+python-multipart 0.0.5   PYSEC-2024-38   0.0.7
+python-multipart 0.0.5   PYSEC-2026-1851 0.0.18
+python-multipart 0.0.5   PYSEC-2026-1852 0.0.22
+python-multipart 0.0.5   PYSEC-2026-3038 0.0.26
+python-multipart 0.0.5   PYSEC-2026-3039 0.0.27
+python-multipart 0.0.5   PYSEC-2026-3040 0.0.31
+python-multipart 0.0.5   PYSEC-2026-3036 0.0.30
+python-multipart 0.0.5   PYSEC-2026-3037 0.0.30
+python-multipart 0.0.5   PYSEC-2026-1850 0.0.7
+python-multipart 0.0.5   PYSEC-2026-1852 0.0.22
+python-multipart 0.0.5   PYSEC-2026-1851 0.0.18
+python-multipart 0.0.5   PYSEC-2026-3038 0.0.26
+python-multipart 0.0.5   PYSEC-2026-3037 0.0.30
+python-multipart 0.0.5   PYSEC-2026-3036 0.0.30
+python-multipart 0.0.5   PYSEC-2026-3040 0.0.31
+python-multipart 0.0.5   PYSEC-2026-3039 0.0.27
+python-jose      3.3.0   PYSEC-2024-233  3.4.0
+python-jose      3.3.0   PYSEC-2024-232  3.4.0
+python-jose      3.3.0   PYSEC-2024-232  3.4.0
+python-jose      3.3.0   PYSEC-2024-233  3.4.0
+python-jose      3.3.0   PYSEC-2025-185
+pytest           7.1.2   PYSEC-2026-1845 9.0.3
+pytest           7.1.2   PYSEC-2026-1845 9.0.3
+httpx            0.22.0  PYSEC-2022-183  0.23.0
